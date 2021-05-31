@@ -1,4 +1,8 @@
-# DNS Updater
+<p align="center">
+  <img src="https://github.com/dnsupdater/dnsupdater/raw/main/doc/dns_updater.png">
+</p>
+
+#DNS Updater
 
 DNS Updater provides "present" and "cleanup" functions that [**LEGO**](https://go-acme.github.io/lego) expects from the external program provider.
 
