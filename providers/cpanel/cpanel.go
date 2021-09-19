@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -49,7 +50,8 @@ func NewClient(cpURL, username, token string) (*API, error) {
 	}
 	u, err := url.Parse(cpURL)
 	if err != nil || u.Hostname() == "" {
-		return nil, fmt.Errorf("'%s' is not a URL", cpURL)
+		return nil, errors.Errorf("'%s' is not a URL", cpURL)
+
 	}
 
 	return &API{
@@ -105,9 +107,6 @@ func (cpa *API) Request(module, function string, arguments Args) ([]gjson.Result
 	// Buffer the full response. This costs more memory but we want to to report the contents if
 	// it's not valid JSON.
 	buf, err := ioutil.ReadAll(resp.Body)
-
-	//	fmt.Printf("\n\nfunction: %s,buf: %s\n", function, string(buf))
-
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read full API response")
 	}
@@ -170,7 +169,6 @@ func (cpa *API) FindTXTRecord(domain, recType string) (*TXTRecordData, error) {
 
 func (cpa *API) GetBaseDomains() (*[]string, error) {
 	var resp []gjson.Result
-
 	var err error
 	var domainList []string
 
@@ -183,14 +181,9 @@ func (cpa *API) GetBaseDomains() (*[]string, error) {
 	}
 
 	for _, b := range resp {
-
 		domainList = append(domainList, b.Get("domain").String())
-		//	fmt.Printf(" %+v\n",b.Get("domain").Value())
-
 	}
-
 	return &domainList, err
-
 }
 
 func (cpa *API) UpdateTXTRecord(rec TXTRecordData, value string) (z *TXTRecordResponse, err error) {

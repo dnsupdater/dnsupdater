@@ -17,16 +17,18 @@ Please refer to LEGO docs at [https://go-acme.github.io/lego](https://go-acme.gi
 dnsu help
 
 # for cPanel provider
-dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> info <domain name> for A record>
-dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> present <domain name> for TXT record> <auth-key>'
-dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> cleanup <domain name> for TXT record> <auth-key>'
-
-Support Environment Variables:
-cPanel URL: DNSU_CPANEL-URL 
-cPanel User: DNSU_CPANEL-USER  
-cPanel Token: DNSU_CPANEL-TOKEN 
+ dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] info <domain name for A record>
+ dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] present <domain name> for TXT record> <auth-key>'
+ dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] cleanup <domain name> for TXT record> <auth-key>'
 	
 ```
+### Supported environment eariables:
+- DNSU_LOG-OUTPUT for log file
+- DNSU_CPANEL-URL for cPanel URL
+- DNSU_CPANEL-USER for cPanel User
+- DNSU_CPANEL-TOKEN for cPanel Token
+
+
 ### Example:
 ```
 # for verify cPanel access

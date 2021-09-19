@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 func Present(domain, keyAuth string, cpURL, cpUser, cpToken string) error {
@@ -22,29 +23,27 @@ func Present(domain, keyAuth string, cpURL, cpUser, cpToken string) error {
 	if err != nil {
 		return err
 	}
-
 	if txtRecordData.Domain == "" { // Record not found.
 		addResp, err := cpanelClient.AddTXTRecords(domain, keyAuth, 0)
 		if err != nil {
 			return err
 		}
-
-		fmt.Printf("TXT record will be added. Newserial: %s ", addResp.Newserial)
+		fmt.Printf("TXT record for %s with keyAuth=%s will be added. Newserial: %s", domain, keyAuth, addResp.Newserial)
+		log.Infof("TXT record for %s  with keyAuth=%s will be added. Newserial: %s", domain, keyAuth, addResp.Newserial)
 
 		return nil
 	}
-
 	if (txtRecordData.Record == keyAuth) && (txtRecordData.Domain == domain) {
-		fmt.Printf("TXT record with same keyAuth already exists. Not require any update.")
+		fmt.Printf("TXT record with same keyAuth=%s already exists for %s Not require any update.", keyAuth, domain)
+		log.Infof("TXT record with same keyAuth= %s already exists for %s Not require any update.", keyAuth, domain)
 		return nil
 	}
-
 	updResp, err := cpanelClient.UpdateTXTRecord(*txtRecordData, keyAuth)
 	if err != nil {
-		fmt.Printf("err: %s\n", err.Error())
-	} else {
-		fmt.Printf("TXT record will be updated. Newserial: %s ", updResp.Newserial)
+		return err
 	}
+	fmt.Printf("TXT record for %s will be updated with keyAuth=%s. Newserial: %s", domain, keyAuth, updResp.Newserial)
+	log.Infof("TXT record for %s will be updated with keyAuth=%s. Newserial: %s", domain, keyAuth, updResp.Newserial)
 
 	return nil
 }
@@ -67,7 +66,8 @@ func Cleanup(domain string, cpURL, cpUser, cpToken string) error {
 	}
 
 	if txtRecordData.Domain == "" {
-		fmt.Printf("Record not found for %s", domain)
+		fmt.Printf("TXT Record not found for %s", domain)
+		log.Infof("TXT Record not found for %s", domain)
 	}
 
 	if txtRecordData.Domain == domain { // Record  found.
@@ -75,7 +75,8 @@ func Cleanup(domain string, cpURL, cpUser, cpToken string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Record will be removed. Newserial: %s ", remResp.Newserial)
+		fmt.Printf("%s TXT Record will be removed. Newserial: %s", domain, remResp.Newserial)
+		log.Infof("%s TXT Record will be removed. Newserial: %s", domain, remResp.Newserial)
 	}
 
 	return nil
@@ -99,11 +100,11 @@ func DomainInfo(domain, cpURL, cpUser, cpToken string) error {
 	}
 
 	if txtRecordData.Domain == "" { // Record not found.
-		fmt.Printf("Record not found. This subcommand is only for 'A Type' records.")
+		fmt.Printf("Error: Record not found. This subcommand is only for 'A Type' records.")
+		log.Error("Record not found. This subcommand is only for 'A Type' records.")
 		return nil
 	}
-
-	fmt.Printf("Found 'A type' record:\n name: %s, address: %s\n", txtRecordData.Domain, txtRecordData.Record)
-
+	fmt.Printf("Found 'A type' record: %s / %s", txtRecordData.Domain, txtRecordData.Record)
+	log.Infof("Found 'A type' record: %s / %s", txtRecordData.Domain, txtRecordData.Record)
 	return nil
 }
