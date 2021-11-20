@@ -10,7 +10,7 @@ import (
 func Present(domain, keyAuth string, cpURL, cpUser, cpToken string) error {
 	var (
 		cpanelClient  *API
-		txtRecordData *TXTRecordData
+		txtRecordData *DNSRecordData
 		err           error
 	)
 
@@ -19,7 +19,7 @@ func Present(domain, keyAuth string, cpURL, cpUser, cpToken string) error {
 		return errors.Wrapf(err, "Couldn't create remote cPanel API client")
 	}
 
-	txtRecordData, err = cpanelClient.FindTXTRecord(domain, "TXT")
+	txtRecordData, err = cpanelClient.FindDNSRecord(domain, "TXT")
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func Present(domain, keyAuth string, cpURL, cpUser, cpToken string) error {
 func Cleanup(domain string, cpURL, cpUser, cpToken string) error {
 	var (
 		cpanelClient  *API
-		txtRecordData *TXTRecordData
+		txtRecordData *DNSRecordData
 		err           error
 	)
 
@@ -60,7 +60,7 @@ func Cleanup(domain string, cpURL, cpUser, cpToken string) error {
 		return errors.Wrapf(err, "Couldn't create remote cPanel API client")
 	}
 
-	txtRecordData, err = cpanelClient.FindTXTRecord(domain, "TXT")
+	txtRecordData, err = cpanelClient.FindDNSRecord(domain, "TXT")
 	if err != nil {
 		return err
 	}
@@ -84,9 +84,9 @@ func Cleanup(domain string, cpURL, cpUser, cpToken string) error {
 
 func DomainInfo(domain, cpURL, cpUser, cpToken string) error {
 	var (
-		cpanelClient  *API
-		txtRecordData *TXTRecordData
-		err           error
+		cpanelClient *API
+		RecordData   *DNSRecordData
+		err          error
 	)
 
 	if cpanelClient, err = NewClient(
@@ -94,17 +94,18 @@ func DomainInfo(domain, cpURL, cpUser, cpToken string) error {
 		return errors.Wrapf(err, "Couldn't create remote cPanel API client")
 	}
 
-	txtRecordData, err = cpanelClient.FindTXTRecord(domain, "A")
+	RecordData, err = cpanelClient.FindDNSRecord(domain, "A")
 	if err != nil {
+
 		return err
 	}
 
-	if txtRecordData.Domain == "" { // Record not found.
+	if RecordData.Domain == "" { // Record not found.
 		fmt.Printf("Error: Record not found. This subcommand is only for 'A Type' records.")
 		log.Error("Record not found. This subcommand is only for 'A Type' records.")
 		return nil
 	}
-	fmt.Printf("Found 'A type' record: %s / %s", txtRecordData.Domain, txtRecordData.Record)
-	log.Infof("Found 'A type' record: %s / %s", txtRecordData.Domain, txtRecordData.Record)
+	fmt.Printf("Found 'A type' record: %s / %s", RecordData.Domain, RecordData.Record)
+	log.Infof("Found 'A type' record: %s / %s", RecordData.Domain, RecordData.Record)
 	return nil
 }

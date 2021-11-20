@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -25,7 +24,7 @@ type API struct {
 	ctx      *context.Context
 }
 
-type TXTRecordData struct {
+type DNSRecordData struct {
 	Line   int
 	Domain string
 	Type   string
@@ -33,7 +32,7 @@ type TXTRecordData struct {
 	TTL    int
 }
 
-type TXTRecordResponse struct {
+type DNSRecordResponse struct {
 	Newserial string
 	StatusMsg string
 	Status    bool
@@ -112,7 +111,7 @@ func (cpa *API) Request(module, function string, arguments Args) ([]gjson.Result
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Wrapf(err, "API request %s:%s failed: HTTP %s",
+		return nil, errors.Errorf("API request %s/%s failed: HTTP %s",
 			module, function, resp.Status)
 	}
 
@@ -135,26 +134,28 @@ func (cpa *API) Request(module, function string, arguments Args) ([]gjson.Result
 
 }
 
-func (cpa *API) FindTXTRecord(domain, recType string) (*TXTRecordData, error) {
+func (cpa *API) FindDNSRecord(domain, recType string) (*DNSRecordData, error) {
 	var resp []gjson.Result
-	var rec TXTRecordData
+	var rec DNSRecordData
 
 	zone, err := publicsuffix.EffectiveTLDPlusOne(strings.TrimRight(domain, "."))
 
 	arguments := Args{}
 	arguments["domain"] = zone
 	if !(recType == "A" || recType == "TXT") {
-		return &rec, errors.New(recType + " type is not implemented in cPanel FindTXTRecord function")
+		return &rec, errors.New(recType + " type is not implemented in cPanel FindDNSRecord function")
 	}
 	arguments["type"] = recType
 
 	arguments["name"] = domain
 
 	if resp, err = cpa.Request("ZoneEdit", "fetchzone_records", arguments); err != nil {
+
 		return nil, err
 	}
 
 	if len(resp) == 0 {
+		fmt.Println("Hata: ")
 		return &rec, nil
 	}
 
@@ -186,7 +187,7 @@ func (cpa *API) GetBaseDomains() (*[]string, error) {
 	return &domainList, err
 }
 
-func (cpa *API) UpdateTXTRecord(rec TXTRecordData, value string) (z *TXTRecordResponse, err error) {
+func (cpa *API) UpdateTXTRecord(rec DNSRecordData, value string) (z *DNSRecordResponse, err error) {
 	var resp []gjson.Result
 
 	zone, err := publicsuffix.EffectiveTLDPlusOne(strings.TrimRight(rec.Domain, "."))
@@ -208,7 +209,7 @@ func (cpa *API) UpdateTXTRecord(rec TXTRecordData, value string) (z *TXTRecordRe
 		return nil, errors.New("Empty response")
 	}
 
-	var response TXTRecordResponse
+	var response DNSRecordResponse
 
 	response.StatusMsg = resp[0].Get("result.statusmsg").String() // : [{"result":{"statusmsg":"","newserial":"2021050400","status":1}}]
 	response.Newserial = resp[0].Get("result.newserial").String()
@@ -217,7 +218,7 @@ func (cpa *API) UpdateTXTRecord(rec TXTRecordData, value string) (z *TXTRecordRe
 	return &response, err
 }
 
-func (cpa *API) AddTXTRecords(domain, value string, ttl int) (z *TXTRecordResponse, err error) {
+func (cpa *API) AddTXTRecords(domain, value string, ttl int) (z *DNSRecordResponse, err error) {
 	var resp []gjson.Result
 
 	zone, err := publicsuffix.EffectiveTLDPlusOne(strings.TrimRight(domain, "."))
@@ -238,7 +239,7 @@ func (cpa *API) AddTXTRecords(domain, value string, ttl int) (z *TXTRecordRespon
 		return nil, errors.New("Empty response")
 	}
 
-	var response TXTRecordResponse
+	var response DNSRecordResponse
 
 	response.StatusMsg = resp[0].Get("result.statusmsg").String() // : [{"result":{"statusmsg":"","newserial":"2021050400","status":1}}]
 	response.Newserial = resp[0].Get("result.newserial").String()
@@ -247,7 +248,7 @@ func (cpa *API) AddTXTRecords(domain, value string, ttl int) (z *TXTRecordRespon
 	return &response, err
 }
 
-func (cpa *API) RemoveTXTRecord(rec TXTRecordData) (z *TXTRecordResponse, err error) {
+func (cpa *API) RemoveTXTRecord(rec DNSRecordData) (z *DNSRecordResponse, err error) {
 	var resp []gjson.Result
 
 	zone, err := publicsuffix.EffectiveTLDPlusOne(strings.TrimRight(rec.Domain, "."))
@@ -263,7 +264,7 @@ func (cpa *API) RemoveTXTRecord(rec TXTRecordData) (z *TXTRecordResponse, err er
 		return nil, errors.New("Empty response")
 	}
 
-	var response TXTRecordResponse
+	var response DNSRecordResponse
 
 	response.StatusMsg = resp[0].Get("result.statusmsg").String()
 	response.Newserial = resp[0].Get("result.newserial").String()

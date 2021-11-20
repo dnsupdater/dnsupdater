@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const Version = "0.6"
+const Version = "0.7"
 
 func help() {
 	fmt.Println(`
@@ -24,9 +24,9 @@ Usage:
   dnsu help
 
   # for cPanel provider
-  dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] info <domain name for A record>
-  dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] present <domain name> for TXT record> <auth-key>'
-  dnsu cpnael --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] cleanup <domain name> for TXT record> <auth-key>'
+  dnsu cpanel --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] info <domain name for A record>
+  dnsu cpanel --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] present <domain name> for TXT record> <auth-key>'
+  dnsu cpanel --url <cPanel URL> --user <cPanel User> --token <cPanel Token> [--logoutput <log file name>] cleanup <domain name> for TXT record> <auth-key>'
 
 Supported Environment Variables:
     DNSU_LOG-OUTPUT for log file
@@ -36,7 +36,7 @@ Supported Environment Variables:
 
 Example:
   # for verify cPanel access   
-  dnsu cpnael --url "https://cpanel-hostname:2083" --user cpaneluser --token "RMYKKBIT5TQ1ITFU58VZBQB5TDEYQZN4" info '_acme-challenge.my.example.org.'
+  dnsu cpanel --url "https://cpanel-hostname:2083" --user cpaneluser --token "RMYKKBIT5TQ1ITFU58VZBQB5TDEYQZN4" info '_acme-challenge.my.example.org.'
  
 `)
 }
@@ -53,6 +53,7 @@ func main() {
 	var (
 		logOutput, cpURL, cpUser, cpToken     string
 		eLogOutput, ecpURL, ecpUser, ecpToken string
+		mdl                                   string
 	)
 
 	fmt.Printf("\nDNS Updater v%s\n\n", Version)
@@ -88,6 +89,7 @@ func main() {
 	}
 
 	logFile := "dnsu.log"
+
 	switch logOutput {
 	case "":
 		file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
@@ -123,10 +125,13 @@ func main() {
 	}
 
 	cpanelCmd.Parse(os.Args[2:])
-	switch os.Args[1] {
-	case "help":
+	mdl = os.Args[1]
+
+	switch {
+	case mdl == "help":
 		help()
-	case "cpanel":
+	case mdl == "cpanel":
+		log.Println("Geldi----cpanel-")
 		if (cpURL == "") || (cpUser == "") || (cpToken == "") {
 			fmt.Println("Error: cpanel command must have the flags '--url', '--user' and '--token' or the corresponding environment variables.")
 			log.Fatal("cpanel command must have the flags '--url', '--user' and '--token' or the corresponding environment variables.")
