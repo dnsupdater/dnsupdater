@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const Version = "0.7"
+const Version = "0.7.1"
 
 func help() {
 	fmt.Println(`

@@ -155,7 +155,7 @@ func (cpa *API) FindDNSRecord(domain, recType string) (*DNSRecordData, error) {
 	}
 
 	if len(resp) == 0 {
-		fmt.Println("Hata: ")
+
 		return &rec, nil
 	}
 
